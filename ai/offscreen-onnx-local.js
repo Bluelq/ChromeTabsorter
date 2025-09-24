@@ -486,13 +486,15 @@ class RealAIProcessor {
             const modelBuffer = await modelResponse.arrayBuffer();
             console.log(`Model loaded: ${modelBuffer.byteLength} bytes`);
 
-            // Create ONNX inference session
-            console.log('Creating ONNX inference session...');
+            // Create ONNX inference session with options optimized for lower memory usage
+            console.log('Creating ONNX inference session with low-memory profile...');
             this.session = await ort.InferenceSession.create(modelBuffer, {
                 executionProviders: ['wasm'],
-                graphOptimizationLevel: 'all',
-                enableCpuMemArena: true,
-                enableMemPattern: true
+                // Use a lower level of graph optimization to reduce memory overhead
+                graphOptimizationLevel: 'basic',
+                // Disable memory arena and pattern optimizations to trade speed for stability
+                enableCpuMemArena: false,
+                enableMemPattern: false
             });
 
             console.log('ONNX model loaded successfully!');
