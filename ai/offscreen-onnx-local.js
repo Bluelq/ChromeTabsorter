@@ -384,8 +384,12 @@ class RealAIProcessor {
     async warmUp() {
         console.log('[AI INIT] Running warm-up inference...');
         const testEmbedding = await this.generateEmbedding('warmup test');
-        if (!testEmbedding || testEmbedding.length !== 384) {
-            throw new Error('Warm-up embedding failed or wrong dimensions');
+        // The `generateEmbedding` function now returns null on failure.
+        if (!testEmbedding) {
+            throw new Error('Warm-up inference failed: generateEmbedding returned null.');
+        }
+        if (testEmbedding.length !== 384) {
+            throw new Error(`Warm-up embedding failed or wrong dimensions. Expected 384, got ${testEmbedding.length}`);
         }
         console.log('[AI INIT] Warm-up successful, embedding dimensions:', testEmbedding.length);
     }
@@ -482,13 +486,15 @@ class RealAIProcessor {
             const modelBuffer = await modelResponse.arrayBuffer();
             console.log(`Model loaded: ${modelBuffer.byteLength} bytes`);
 
-            // Create ONNX inference session
-            console.log('Creating ONNX inference session...');
+            // Create ONNX inference session with options optimized for lower memory usage
+            console.log('Creating ONNX inference session with low-memory profile...');
             this.session = await ort.InferenceSession.create(modelBuffer, {
                 executionProviders: ['wasm'],
-                graphOptimizationLevel: 'all',
-                enableCpuMemArena: true,
-                enableMemPattern: true
+                // Use a lower level of graph optimization to reduce memory overhead
+                graphOptimizationLevel: 'basic',
+                // Disable memory arena and pattern optimizations to trade speed for stability
+                enableCpuMemArena: false,
+                enableMemPattern: false
             });
 
             console.log('ONNX model loaded successfully!');
@@ -579,30 +585,25 @@ class RealAIProcessor {
             console.log(`Generating real AI embedding for: "${text}"`);
 
             const tokens = this.tokenize(text);
-            console.log(`Tokenized into ${tokens.length} tokens`);
 
             // Create input tensors
             const inputIds = new ort.Tensor('int64', BigInt64Array.from(tokens.map(x => BigInt(x))), [1, tokens.length]);
             const attentionMask = new ort.Tensor('int64', BigInt64Array.from(tokens.map(() => 1n)), [1, tokens.length]);
-            const tokenTypeIds = new ort.Tensor('int64', BigInt64Array.from(tokens.map(() => 0n)), [1, tokens.length]); // All zeros for single sentence
+            const tokenTypeIds = new ort.Tensor('int64', BigInt64Array.from(tokens.map(() => 0n)), [1, tokens.length]);
 
-            // Run inference
             const feeds = {
                 input_ids: inputIds,
                 attention_mask: attentionMask,
                 token_type_ids: tokenTypeIds
             };
 
-            console.log('Running ONNX inference...');
             const results = await this.session.run(feeds);
-
-            // Extract embeddings from last hidden state
             const lastHiddenState = results.last_hidden_state;
+
             if (!lastHiddenState) {
                 throw new Error('Model output missing last_hidden_state');
             }
 
-            // Mean pooling across sequence
             const embeddings = lastHiddenState.data;
             const seqLength = tokens.length;
             const hiddenSize = lastHiddenState.dims[2];
@@ -616,7 +617,6 @@ class RealAIProcessor {
                 pooledEmbedding[i] = sum / seqLength;
             }
 
-            // L2 normalize
             const norm = Math.sqrt(pooledEmbedding.reduce((a, b) => a + b * b, 0));
             if (norm > 0) {
                 for (let i = 0; i < hiddenSize; i++) {
@@ -625,8 +625,6 @@ class RealAIProcessor {
             }
 
             const result = Array.from(pooledEmbedding);
-            console.log(`Generated real AI embedding: ${result.length} dimensions`);
-
             this.embeddingCache.set(text, result);
 
             if (this.embeddingCache.size > 500) {
@@ -637,8 +635,14 @@ class RealAIProcessor {
             return result;
 
         } catch (error) {
-            console.error('Error in AI embedding generation:', error);
-            throw error;
+            console.error(`Error in AI embedding generation for text: "${text}"`, {
+                message: error.message,
+                stack: error.stack,
+                name: error.name
+            });
+            // Do not re-throw, instead return null to prevent crashing the process.
+            // The calling function (`generateEmbeddings`) is responsible for handling this null value.
+            return null;
         }
     }
 
@@ -646,12 +650,16 @@ class RealAIProcessor {
         const embeddings = [];
 
         for (const text of texts) {
-            try {
-                const embedding = await this.generateEmbedding(text);
+            // DIAGNOSTIC LOG: Print the text right before processing.
+            // If the process crashes, the last text logged will be the culprit.
+            console.log(`[AI_DEBUG] Processing text: "${text}"`);
+
+            const embedding = await this.generateEmbedding(text);
+            if (embedding) {
                 embeddings.push(embedding);
-            } catch (error) {
-                console.error(`Failed to generate AI embedding for: ${text}`, error);
-                // Return zero vector as fallback
+            } else {
+                // If embedding generation failed (returned null), push a zero vector as a fallback.
+                console.warn(`Could not generate embedding for text: "${text}". Using fallback vector.`);
                 embeddings.push(new Array(384).fill(0));
             }
         }
@@ -949,32 +957,33 @@ RealAIProcessor.prototype.runSelfTest = async function() {
                 break;
 
             case 'PROCESS_TABS':
-                if (processor.currentState !== processor.states.READY || !processor.modelReady) {
-                    sendResponse({
-                        success: false,
-                        error: 'AI model not ready',
-                        state: processor.currentState,
-                        modelReady: processor.modelReady
-                    });
-                    break;
-                }
-
                 try {
+                    if (processor.currentState !== processor.states.READY || !processor.modelReady) {
+                        throw new Error(`AI not ready. State: ${processor.currentState}, Model Ready: ${processor.modelReady}`);
+                    }
+
                     const { groups, ungrouped } = await processor.groupTabsBySimilarity(
                         message.tabs,
                         message.threshold || 0.5
                     );
                     const labeledGroups = await processor.generateGroupLabels(groups);
+
                     sendResponse({
                         success: true,
                         groups: labeledGroups,
                         ungrouped
                     });
                 } catch (error) {
-                    console.error('Error processing tabs with real AI:', error);
+                    console.error('Catastrophic error in PROCESS_TABS:', error);
+                    // Send a structured error response instead of crashing the port
                     sendResponse({
                         success: false,
-                        error: error.message
+                        error: 'A critical error occurred during tab processing.',
+                        details: {
+                            message: error.message,
+                            stack: error.stack,
+                            name: error.name
+                        }
                     });
                 }
                 break;
