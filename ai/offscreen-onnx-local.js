@@ -649,7 +649,15 @@ class RealAIProcessor {
     async generateEmbeddings(texts) {
         const embeddings = [];
 
-        for (const text of texts) {
+       // ... inside the generateEmbeddings function ...
+for (const text of texts) {
+    // DIAGNOSTIC LOG: Print the text right before processing.
+    // If the process crashes, the last text logged will be the culprit.
+    console.log(`[AI_DEBUG] Processing text: "${text}"`);
+
+    const embedding = await this.generateEmbedding(text);
+    if (embedding) {
+// ...
             const embedding = await this.generateEmbedding(text);
             if (embedding) {
                 embeddings.push(embedding);
