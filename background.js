@@ -124,7 +124,12 @@ class TabManager {
       }
 
       if (!response.success) {
-        throw new Error(response.error);
+        // Log the detailed error from the offscreen script if available
+        if (response.details) {
+          console.error('AI processing failed with details:', response.details);
+          throw new Error(`AI processing failed: ${response.details.message}`);
+        }
+        throw new Error(response.error || 'Unknown error from AI processor');
       }
 
       const formattedGroups = response.groups.map(group => ({
