@@ -192,29 +192,72 @@ function hideStatus() {
 function showResults(data) {
   elements.resultsSection.classList.remove('hidden');
   elements.resultsList.innerHTML = '';
-  
-  if (data.categories && data.categories.length > 0) {
+
+  // The background script sends `groups` for AI mode and `categories` for domain mode.
+  const groups = data.groups || data.categories;
+  const tabsProcessed = data.totalTabs || 0;
+  const groupsCreated = data.groupsCreated || 0;
+
+  if (groups && groups.length > 0) {
     const list = document.createElement('ul');
-    
-    data.categories.forEach(category => {
+    list.className = 'category-list';
+
+    groups.forEach(group => {
       const item = document.createElement('li');
-      item.textContent = category;
+      item.className = 'category-item';
+
+      const groupName = document.createElement('span');
+      groupName.className = 'category-name';
+      groupName.textContent = group.label || group; // Handle both object and string array
+
+      const groupMeta = document.createElement('span');
+      groupMeta.className = 'category-meta';
+
+      const tabCount = document.createElement('span');
+      tabCount.className = 'tab-count';
+      tabCount.textContent = `${group.count || 0} tabs`;
+      groupMeta.appendChild(tabCount);
+
+      // Display confidence score if available (AI mode)
+      if (group.confidence !== undefined) {
+        const confidenceScore = document.createElement('span');
+        confidenceScore.className = 'confidence-score';
+        const percentage = Math.round(group.confidence * 100);
+        confidenceScore.textContent = `${percentage}%`;
+        // Add a class based on confidence level for styling
+        if (percentage > 80) {
+            confidenceScore.classList.add('high');
+        } else if (percentage > 60) {
+            confidenceScore.classList.add('medium');
+        } else {
+            confidenceScore.classList.add('low');
+        }
+        groupMeta.appendChild(confidenceScore);
+      }
+
+      item.appendChild(groupName);
+      item.appendChild(groupMeta);
       list.appendChild(item);
     });
-    
+
     elements.resultsList.appendChild(list);
-    
+
     // Add summary
     const summary = document.createElement('div');
     summary.className = 'results-summary';
-    summary.textContent = `✅ ${data.tabsProcessed} tabs sorted into ${data.categories.length} categories`;
+    summary.textContent = `✅ ${tabsProcessed} tabs sorted into ${groupsCreated} groups.`;
+    elements.resultsList.appendChild(summary);
+  } else {
+     const summary = document.createElement('div');
+    summary.className = 'results-summary';
+    summary.textContent = 'ℹ️ No new groups were created.';
     elements.resultsList.appendChild(summary);
   }
-  
-  // Auto-hide results after 3 seconds
+
+  // Auto-hide results after 5 seconds
   setTimeout(() => {
     elements.resultsSection.classList.add('hidden');
-  }, 3000);
+  }, 5000);
 }
 
 /**

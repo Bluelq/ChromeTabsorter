@@ -41,14 +41,21 @@ class TabManager {
       // Wait for the AI model to signal it's ready (full AI implementation initializes itself)
       await new Promise((resolve, reject) => {
         const listener = (message) => {
-          if (message.type === 'AI_MODEL_READY') {
+          // Listen for 'ai:ready' for success
+          if (message.type === 'ai:ready') {
+            console.log('Received ai:ready signal from offscreen document.');
             chrome.runtime.onMessage.removeListener(listener);
             clearTimeout(timeoutId);
             resolve();
-          } else if (message.type === 'AI_MODEL_ERROR') {
+          } else if (message.type === 'ai:error') {
+            // Listen for 'ai:error' for failure
+            console.error('Received ai:error signal from offscreen document:', message);
             chrome.runtime.onMessage.removeListener(listener);
             clearTimeout(timeoutId);
-            reject(new Error(message.error || 'AI initialization failed'));
+            // Reject with a more informative error message
+            const errorMessage = message.error || 'Unknown AI initialization error';
+            const errorStage = message.stage || 'UNKNOWN_STAGE';
+            reject(new Error(`AI initialization failed at stage ${errorStage}: ${errorMessage}`));
           }
         };
 
