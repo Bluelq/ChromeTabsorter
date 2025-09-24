@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="64" cy="64" r="60" fill="#5865f2"/>
+  
+  <!-- Grid Icon -->
+  <rect x="30" y="30" width="28" height="28" rx="4" fill="white" opacity="0.9"/>
+  <rect x="70" y="30" width="28" height="28" rx="4" fill="white" opacity="0.9"/>
+  <rect x="30" y="70" width="28" height="28" rx="4" fill="white" opacity="0.9"/>
+  <rect x="70" y="70" width="28" height="28" rx="4" fill="white" opacity="0.9"/>
+  
+  <!-- AI Sparkle -->
+  <path d="M64 45 L66 50 L71 52 L66 54 L64 59 L62 54 L57 52 L62 50 Z" fill="#faa61a"/>
+</svg>

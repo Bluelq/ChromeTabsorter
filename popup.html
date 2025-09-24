@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>TabSorter AI</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="container">
+    <h1><span>🤖</span> TabSorter AI</h1>
+
+    <div class="ai-status" id="aiStatus">
+      <div class="status-indicator">
+        <span class="status-dot" id="statusDot"></span>
+        <span class="status-text" id="statusText">AI Loading...</span>
+      </div>
+    </div>
+
+    <div class="stats-card">
+      <div class="stat-row"><span>Total Tabs:</span><span class="stat-value" id="totalTabs">-</span></div>
+      <div class="stat-row"><span>Potential Groups:</span><span class="stat-value" id="potentialGroups">-</span></div>
+      <div class="groups-preview hidden" id="groupsPreview"></div>
+    </div>
+
+    <div class="options">
+      <div class="option-row">
+        <label for="useAI">AI Semantic Grouping</label>
+        <label class="toggle-switch">
+          <input type="checkbox" id="useAI" checked /><span class="slider"></span>
+        </label>
+      </div>
+      <div class="option-row">
+        <label for="useWindows">Use Windows (instead of Groups)</label>
+        <label class="toggle-switch">
+          <input type="checkbox" id="useWindows" /><span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <button class="sort-button" id="sortButton">Sort Tabs Now</button>
+
+    <div class="shortcut-hint">Keyboard shortcut: <span class="shortcut-key">Ctrl+Shift+S</span></div>
+
+    <div class="loading hidden" id="loading">
+      <div class="spinner"></div>
+      <p>Sorting your tabs...</p>
+    </div>
+  </div>
+
+  <!-- LOCAL bundle (relative path from popup/ to ext/libs/) -->
+  <script src="../ext/libs/transformers.bundle.js"></script>
+  <!-- Your popup logic -->
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

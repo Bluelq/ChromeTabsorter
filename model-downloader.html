@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>TabSorter AI - Model Downloader</title>
+    <style>
+        body {
+            font-family: -apple-system, system-ui, sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 { font-size: 32px; margin-bottom: 10px; }
+        .subtitle { color: #666; margin-bottom: 30px; }
+        .status {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        button {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 10px 10px 0;
+        }
+        button:hover { background: #f0f0f0; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: #222;
+            border-radius: 4px;
+        }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+        .pending { color: #FFC107; }
+        .progress {
+            width: 100%;
+            background: #333;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            background: #4CAF50;
+            height: 100%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: bold;
+        }
+        #log {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .warning {
+            background: #332200;
+            border: 1px solid #665500;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .instructions {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        code {
+            background: #222;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>🤖 TabSorter AI - Model Downloader</h1>
+    <p class="subtitle">Download the AI model files for offline semantic tab grouping</p>
+
+    <div class="warning">
+        <strong>⚠️ Important:</strong> This will download ~25MB of model files from Hugging Face.
+        The files will be saved to your Downloads folder. You'll need to manually move them to the extension.
+    </div>
+
+    <div class="status">
+        <h3>Model Files Required:</h3>
+        <div id="fileList">
+            <div class="file-item">
+                <span>model_quantized.onnx (~23MB)</span>
+                <span class="pending">Pending</span>
+            </div>
+            <div class="file-item">
+                <span>tokenizer.json (~712KB)</span>
+                <span class="pending">Pending</span>
+            </div>
+            <div class="file-item">
+                <span>tokenizer_config.json (~1KB)</span>
+                <span class="pending">Pending</span>
+            </div>
+            <div class="file-item">
+                <span>config.json (~1KB)</span>
+                <span class="pending">Pending</span>
+            </div>
+            <div class="file-item">
+                <span>special_tokens_map.json (~1KB)</span>
+                <span class="pending">Pending</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="progress">
+        <div class="progress-bar" id="progressBar" style="width: 0%">0%</div>
+    </div>
+
+    <button onclick="downloadAllFiles()" id="downloadBtn">Download All Model Files</button>
+    <button onclick="testLocalModel()" id="testBtn" disabled>Test Local Model</button>
+
+    <div id="log"></div>
+
+    <div class="instructions">
+        <h3>After Download:</h3>
+        <ol>
+            <li>Create a folder: <code>C:\Aentic\tab-sorter-extension\models\Xenova\all-MiniLM-L6-v2\onnx\</code></li>
+            <li>Move all downloaded files from your Downloads folder to that location</li>
+            <li>Reload the extension in Chrome</li>
+            <li>The AI should now work fully offline!</li>
+        </ol>
+    </div>
+
+    <script>
+        const MODEL_BASE = 'https://huggingface.co/Xenova/all-MiniLM-L6-v2/resolve/main/onnx/';
+        const FILES = [
+            'model_quantized.onnx',
+            'tokenizer.json', 
+            'tokenizer_config.json',
+            'config.json',
+            'special_tokens_map.json'
+        ];
+        
+        let downloadedCount = 0;
+        
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#f44336' : type === 'success' ? '#4CAF50' : '#999';
+            logDiv.innerHTML += `<div style="color: ${color}">[${time}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        async function downloadFile(filename, index) {
+            const fileItem = document.querySelectorAll('.file-item')[index];
+            const statusSpan = fileItem.querySelector('span:last-child');
+            
+            try {
+                log(`Downloading ${filename}...`);
+                statusSpan.textContent = 'Downloading...';
+                statusSpan.className = 'pending';
+                
+                const response = await fetch(MODEL_BASE + filename);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                statusSpan.textContent = '✓ Downloaded';
+                statusSpan.className = 'success';
+                log(`✓ Downloaded ${filename} (${(blob.size / 1024 / 1024).toFixed(2)} MB)`, 'success');
+                
+                downloadedCount++;
+                updateProgress();
+                
+                return true;
+            } catch (error) {
+                statusSpan.textContent = '✗ Failed';
+                statusSpan.className = 'error';
+                log(`✗ Failed to download ${filename}: ${error.message}`, 'error');
+                return false;
+            }
+        }
+        
+        function updateProgress() {
+            const percent = Math.round((downloadedCount / FILES.length) * 100);
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = `${percent}%`;
+            progressBar.textContent = `${percent}%`;
+            
+            if (downloadedCount === FILES.length) {
+                document.getElementById('testBtn').disabled = false;
+                log('All files downloaded! Now move them to the models folder.', 'success');
+            }
+        }
+        
+        async function downloadAllFiles() {
+            const btn = document.getElementById('downloadBtn');
+            btn.disabled = true;
+            btn.textContent = 'Downloading...';
+            downloadedCount = 0;
+            
+            log('Starting download of all model files...');
+            
+            for (let i = 0; i < FILES.length; i++) {
+                await downloadFile(FILES[i], i);
+                // Small delay between downloads
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            btn.textContent = 'Re-download Files';
+            btn.disabled = false;
+        }
+        
+        async function testLocalModel() {
+            log('Testing would require the files to be moved to the extension folder first.');
+            log('Please follow the instructions above, then reload the extension.');
+        }
+    </script>
+</body>
+</html>

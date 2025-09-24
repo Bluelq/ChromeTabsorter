@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Chrome extension development
+chrome-extension-dev/
+
+# Large binary files (consider using Git LFS for these)
+# ext/libs/ort.min.js
+# ai/models/*.onnx
+# ai/models/*.bin
+
+# Environment variables
+.env
+.env.local
+
+# Temporary files
+*.tmp
+*.temp
