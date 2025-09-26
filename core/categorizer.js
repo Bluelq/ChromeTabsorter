@@ -6,14 +6,50 @@
 class SmartCategorizer {
     constructor() {
         this.analyzer = new TabAnalyzer();
-        this.defaultCategories = this.loadDefaultCategories();
+        this.defaultCategories = null;
         this.customRules = [];
+        this.initialized = false;
+    }
+
+    /**
+     * Initialize the categorizer (async)
+     */
+    async initialize() {
+        if (this.initialized) return;
+        this.defaultCategories = await this.loadDefaultCategories();
+        this.initialized = true;
     }
 
     /**
      * Load default categories with their characteristics
      */
-    loadDefaultCategories() {
+    async loadDefaultCategories() {
+        try {
+            // Try to load from JSON file first
+            const response = await fetch(chrome.runtime.getURL('data/default-categories.json'));
+            if (response.ok) {
+                const data = await response.json();
+                // Convert array format to map format for compatibility
+                const categoriesMap = {};
+                for (const category of data.categories) {
+                    categoriesMap[category.id] = {
+                        id: category.id,
+                        name: category.name,
+                        emoji: category.emoji,
+                        color: category.color,
+                        priority: category.priority,
+                        keywords: category.keywords,
+                        domains: category.domains,
+                        patterns: category.urlPatterns ? new RegExp(category.urlPatterns.join('|'), 'i') : new RegExp(category.name, 'i')
+                    };
+                }
+                return categoriesMap;
+            }
+        } catch (error) {
+            console.warn('Failed to load categories from JSON, using fallback:', error);
+        }
+        
+        // Fallback to hardcoded categories
         return {
             'Work': {
                 id: 'work',
@@ -122,6 +158,8 @@ class SmartCategorizer {
      * Main categorization method using multiple strategies
      */
     async categorizeTabs(tabs, options = {}) {
+        // Ensure initialization
+        await this.initialize();
         const {
             useAI = true,
             useRules = true,

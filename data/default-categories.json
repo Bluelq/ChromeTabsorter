@@ -1,0 +1,542 @@
+{
+  "categories": [
+    {
+      "id": "work",
+      "name": "Work & Business",
+      "emoji": "💼",
+      "color": "blue",
+      "priority": 90,
+      "description": "Professional work, meetings, and business-related content",
+      "keywords": ["work", "job", "office", "meeting", "project", "task", "deadline", "report", "presentation", "business", "corporate", "company", "team", "collaboration"],
+      "domains": [
+        "slack.com",
+        "teams.microsoft.com", 
+        "zoom.us",
+        "meet.google.com",
+        "webex.com",
+        "asana.com",
+        "trello.com",
+        "notion.so",
+        "monday.com",
+        "jira.atlassian.com",
+        "confluence.atlassian.com"
+      ],
+      "urlPatterns": [
+        ".*\\/workspace\\/.*",
+        ".*\\/meeting\\/.*",
+        ".*\\/project\\/.*"
+      ],
+      "subcategories": {
+        "meetings": {
+          "name": "Meetings",
+          "keywords": ["meeting", "zoom", "teams", "call", "conference"],
+          "priority": 95
+        },
+        "documents": {
+          "name": "Work Documents", 
+          "keywords": ["document", "report", "presentation", "spreadsheet"],
+          "priority": 85
+        },
+        "communication": {
+          "name": "Team Communication",
+          "keywords": ["slack", "teams", "chat", "message"],
+          "priority": 80
+        }
+      }
+    },
+    {
+      "id": "development", 
+      "name": "Development & Programming",
+      "emoji": "💻",
+      "color": "purple",
+      "priority": 85,
+      "description": "Software development, coding, and technical resources",
+      "keywords": ["code", "programming", "github", "debug", "api", "function", "class", "repository", "commit", "pull request", "development", "software", "coding", "developer", "tech"],
+      "domains": [
+        "github.com",
+        "gitlab.com", 
+        "bitbucket.org",
+        "stackoverflow.com",
+        "dev.to",
+        "medium.com",
+        "codepen.io",
+        "jsfiddle.net",
+        "repl.it",
+        "localhost",
+        "127.0.0.1"
+      ],
+      "urlPatterns": [
+        ".*github\\.com\\/.*\\/.*",
+        ".*stackoverflow\\.com\\/questions\\/.*",
+        ".*localhost.*",
+        ".*127\\.0\\.0\\.1.*"
+      ],
+      "subcategories": {
+        "repositories": {
+          "name": "Code Repositories",
+          "keywords": ["github", "repo", "repository", "code"],
+          "priority": 90
+        },
+        "documentation": {
+          "name": "Technical Docs",
+          "keywords": ["docs", "api", "reference", "documentation"],
+          "priority": 85
+        },
+        "learning": {
+          "name": "Programming Learning",
+          "keywords": ["tutorial", "course", "learn", "example"],
+          "priority": 75
+        }
+      }
+    },
+    {
+      "id": "research",
+      "name": "Research & Academic",
+      "emoji": "🔬", 
+      "color": "green",
+      "priority": 80,
+      "description": "Academic research, papers, and scholarly content",
+      "keywords": ["research", "study", "paper", "journal", "academic", "scholar", "thesis", "publication", "university", "science", "analysis", "methodology"],
+      "domains": [
+        "scholar.google.com",
+        "arxiv.org",
+        "jstor.org", 
+        "pubmed.ncbi.nlm.nih.gov",
+        "researchgate.net",
+        "academia.edu",
+        "sciencedirect.com",
+        "ieee.org",
+        "acm.org"
+      ],
+      "urlPatterns": [
+        ".*\\.edu\\/.*",
+        ".*arxiv\\.org\\/.*",
+        ".*scholar\\.google\\.com\\/.*"
+      ],
+      "subcategories": {
+        "papers": {
+          "name": "Research Papers",
+          "keywords": ["paper", "pdf", "publication", "journal"],
+          "priority": 90
+        },
+        "data": {
+          "name": "Research Data",
+          "keywords": ["dataset", "data", "statistics", "analysis"],
+          "priority": 80
+        }
+      }
+    },
+    {
+      "id": "shopping",
+      "name": "Shopping & E-commerce", 
+      "emoji": "🛒",
+      "color": "orange",
+      "priority": 70,
+      "description": "Online shopping, product research, and purchases",
+      "keywords": ["shop", "buy", "cart", "checkout", "order", "product", "price", "discount", "sale", "store", "retail", "purchase", "marketplace"],
+      "domains": [
+        "amazon.com",
+        "ebay.com",
+        "etsy.com", 
+        "alibaba.com",
+        "walmart.com",
+        "target.com",
+        "bestbuy.com",
+        "costco.com",
+        "shopify.com"
+      ],
+      "urlPatterns": [
+        ".*\\/cart.*", 
+        ".*\\/checkout.*",
+        ".*\\/product\\/.*",
+        ".*\\/item\\/.*"
+      ],
+      "subcategories": {
+        "checkout": {
+          "name": "Shopping Cart",
+          "keywords": ["cart", "checkout", "payment", "order"],
+          "priority": 95
+        },
+        "products": {
+          "name": "Product Pages",
+          "keywords": ["product", "item", "buy", "price"],
+          "priority": 80
+        }
+      }
+    },
+    {
+      "id": "entertainment",
+      "name": "Entertainment & Media",
+      "emoji": "🎬",
+      "color": "red", 
+      "priority": 60,
+      "description": "Videos, movies, music, games, and entertainment",
+      "keywords": ["video", "movie", "show", "watch", "stream", "music", "game", "play", "entertainment", "media", "fun", "leisure"],
+      "domains": [
+        "youtube.com",
+        "netflix.com",
+        "spotify.com",
+        "twitch.tv",
+        "hulu.com",
+        "disney.com",
+        "amazon.com/prime-video",
+        "soundcloud.com",
+        "steam.com",
+        "epicgames.com"
+      ],
+      "urlPatterns": [
+        ".*youtube\\.com\\/watch.*",
+        ".*netflix\\.com\\/watch.*",
+        ".*twitch\\.tv\\/.*"
+      ],
+      "subcategories": {
+        "videos": {
+          "name": "Videos", 
+          "keywords": ["video", "watch", "youtube", "stream"],
+          "priority": 85
+        },
+        "music": {
+          "name": "Music",
+          "keywords": ["music", "song", "playlist", "spotify"],
+          "priority": 80
+        },
+        "games": {
+          "name": "Gaming",
+          "keywords": ["game", "gaming", "play", "steam"],
+          "priority": 75
+        }
+      }
+    },
+    {
+      "id": "social",
+      "name": "Social Media",
+      "emoji": "💬", 
+      "color": "pink",
+      "priority": 50,
+      "description": "Social networking and community platforms",
+      "keywords": ["social", "friend", "post", "share", "like", "comment", "follow", "community", "network", "chat", "message"],
+      "domains": [
+        "facebook.com",
+        "twitter.com",
+        "instagram.com", 
+        "reddit.com",
+        "linkedin.com",
+        "snapchat.com",
+        "tiktok.com",
+        "discord.com",
+        "telegram.org"
+      ],
+      "urlPatterns": [
+        ".*\\/profile\\/.*",
+        ".*\\/user\\/.*",
+        ".*\\/@.*"
+      ],
+      "subcategories": {
+        "profiles": {
+          "name": "User Profiles",
+          "keywords": ["profile", "user", "account"],
+          "priority": 80
+        },
+        "feeds": {
+          "name": "Social Feeds", 
+          "keywords": ["feed", "timeline", "post", "news"],
+          "priority": 75
+        }
+      }
+    },
+    {
+      "id": "news",
+      "name": "News & Information",
+      "emoji": "📰",
+      "color": "grey", 
+      "priority": 40,
+      "description": "News articles, current events, and information",
+      "keywords": ["news", "article", "report", "breaking", "latest", "update", "story", "journalism", "current", "events", "politics"],
+      "domains": [
+        "cnn.com",
+        "bbc.com",
+        "reuters.com",
+        "nytimes.com", 
+        "washingtonpost.com",
+        "theguardian.com",
+        "npr.org",
+        "ap.org",
+        "bloomberg.com",
+        "wsj.com"
+      ],
+      "urlPatterns": [
+        ".*\\/news\\/.*",
+        ".*\\/article\\/.*", 
+        ".*\\/story\\/.*"
+      ],
+      "subcategories": {
+        "breaking": {
+          "name": "Breaking News",
+          "keywords": ["breaking", "urgent", "alert", "live"],
+          "priority": 90
+        },
+        "politics": {
+          "name": "Politics",
+          "keywords": ["politics", "government", "election", "policy"],
+          "priority": 75
+        }
+      }
+    },
+    {
+      "id": "learning",
+      "name": "Learning & Education",
+      "emoji": "📚", 
+      "color": "cyan",
+      "priority": 75,
+      "description": "Educational content, courses, and learning materials",
+      "keywords": ["learn", "course", "tutorial", "lesson", "education", "training", "study", "school", "university", "knowledge", "skill"],
+      "domains": [
+        "coursera.org",
+        "udemy.com",
+        "khanacademy.org",
+        "edx.org",
+        "skillshare.com",
+        "pluralsight.com", 
+        "codecademy.com",
+        "duolingo.com",
+        "brilliant.org"
+      ],
+      "urlPatterns": [
+        ".*\\/course\\/.*",
+        ".*\\/lesson\\/.*",
+        ".*\\/tutorial\\/.*"
+      ],
+      "subcategories": {
+        "courses": {
+          "name": "Online Courses",
+          "keywords": ["course", "class", "program", "curriculum"],
+          "priority": 85
+        },
+        "tutorials": {
+          "name": "Tutorials",
+          "keywords": ["tutorial", "howto", "guide", "walkthrough"], 
+          "priority": 80
+        }
+      }
+    },
+    {
+      "id": "finance",
+      "name": "Finance & Banking",
+      "emoji": "💰",
+      "color": "yellow",
+      "priority": 85, 
+      "description": "Banking, investments, and financial services",
+      "keywords": ["bank", "finance", "money", "invest", "stock", "crypto", "payment", "budget", "savings", "loan", "credit"],
+      "domains": [
+        "chase.com",
+        "bankofamerica.com",
+        "paypal.com",
+        "coinbase.com",
+        "robinhood.com",
+        "fidelity.com",
+        "schwab.com", 
+        "mint.com",
+        "quicken.com"
+      ],
+      "urlPatterns": [
+        ".*\\/banking\\/.*",
+        ".*\\/account\\/.*", 
+        ".*\\/portfolio\\/.*"
+      ],
+      "subcategories": {
+        "banking": {
+          "name": "Banking",
+          "keywords": ["bank", "account", "transaction", "balance"],
+          "priority": 90
+        },
+        "investing": {
+          "name": "Investments",
+          "keywords": ["invest", "stock", "portfolio", "trading"],
+          "priority": 85
+        }
+      }
+    },
+    {
+      "id": "communication", 
+      "name": "Communication & Email",
+      "emoji": "📧",
+      "color": "teal",
+      "priority": 70,
+      "description": "Email, messaging, and communication tools",
+      "keywords": ["email", "mail", "message", "chat", "inbox", "compose", "send", "receive", "communication"],
+      "domains": [
+        "gmail.com",
+        "outlook.com",
+        "mail.yahoo.com",
+        "protonmail.com",
+        "mail.google.com"
+      ],
+      "urlPatterns": [
+        ".*\\/mail\\/.*", 
+        ".*\\/inbox\\/.*",
+        ".*\\/compose\\/.*"
+      ],
+      "subcategories": {
+        "inbox": {
+          "name": "Email Inbox",
+          "keywords": ["inbox", "mail", "email", "messages"],
+          "priority": 85
+        },
+        "compose": {
+          "name": "Compose Email", 
+          "keywords": ["compose", "draft", "write", "send"],
+          "priority": 90
+        }
+      }
+    },
+    {
+      "id": "tools",
+      "name": "Tools & Utilities",
+      "emoji": "🔧",
+      "color": "grey",
+      "priority": 60, 
+      "description": "Online tools, calculators, and utilities",
+      "keywords": ["tool", "utility", "calculator", "converter", "generator", "editor", "helper", "service"],
+      "domains": [
+        "regex101.com",
+        "jsonformatter.org", 
+        "base64decode.org",
+        "canva.com",
+        "figma.com",
+        "photopea.com"
+      ],
+      "urlPatterns": [
+        ".*\\/tool\\/.*",
+        ".*\\/utility\\/.*",
+        ".*\\/converter\\/.*"
+      ],
+      "subcategories": {
+        "design": {
+          "name": "Design Tools",
+          "keywords": ["design", "edit", "create", "canvas"], 
+          "priority": 80
+        },
+        "development": {
+          "name": "Dev Tools", 
+          "keywords": ["regex", "json", "format", "validate"],
+          "priority": 75
+        }
+      }
+    },
+    {
+      "id": "reference",
+      "name": "Reference & Documentation",
+      "emoji": "📖",
+      "color": "indigo", 
+      "priority": 65,
+      "description": "Reference materials, wikis, and documentation", 
+      "keywords": ["reference", "documentation", "wiki", "manual", "guide", "docs", "help", "faq", "knowledge"],
+      "domains": [
+        "wikipedia.org",
+        "stackexchange.com",
+        "docs.python.org",
+        "developer.mozilla.org", 
+        "w3schools.com"
+      ],
+      "urlPatterns": [
+        ".*\\/docs\\/.*",
+        ".*\\/wiki\\/.*",
+        ".*\\/reference\\/.*"
+      ],
+      "subcategories": {
+        "wiki": {
+          "name": "Wiki Pages",
+          "keywords": ["wiki", "wikipedia", "knowledge"],
+          "priority": 80
+        },
+        "documentation": {
+          "name": "Technical Documentation", 
+          "keywords": ["docs", "documentation", "api", "reference"],
+          "priority": 85
+        }
+      }
+    },
+    {
+      "id": "travel",
+      "name": "Travel & Transportation", 
+      "emoji": "✈️",
+      "color": "blue",
+      "priority": 55,
+      "description": "Travel planning, booking, and transportation",
+      "keywords": ["travel", "flight", "hotel", "booking", "trip", "vacation", "transport", "airline", "accommodation"],
+      "domains": [
+        "booking.com", 
+        "expedia.com",
+        "airbnb.com",
+        "kayak.com",
+        "tripadvisor.com",
+        "uber.com",
+        "lyft.com"
+      ],
+      "urlPatterns": [
+        ".*\\/booking\\/.*",
+        ".*\\/travel\\/.*",
+        ".*\\/flight\\/.*"
+      ],
+      "subcategories": {
+        "flights": {
+          "name": "Flights",
+          "keywords": ["flight", "airline", "airport", "booking"],
+          "priority": 85
+        },
+        "hotels": {
+          "name": "Hotels",
+          "keywords": ["hotel", "accommodation", "room", "stay"], 
+          "priority": 80
+        }
+      }
+    },
+    {
+      "id": "health",
+      "name": "Health & Wellness",
+      "emoji": "🏥",
+      "color": "green",
+      "priority": 70, 
+      "description": "Health information, medical resources, and wellness",
+      "keywords": ["health", "medical", "doctor", "medicine", "wellness", "fitness", "exercise", "nutrition", "healthcare"],
+      "domains": [
+        "webmd.com",
+        "mayoclinic.org", 
+        "nih.gov",
+        "myfitnesspal.com",
+        "fitbit.com"
+      ],
+      "urlPatterns": [
+        ".*\\/health\\/.*",
+        ".*\\/medical\\/.*",
+        ".*\\/wellness\\/.*"
+      ],
+      "subcategories": {
+        "medical": {
+          "name": "Medical Info",
+          "keywords": ["medical", "doctor", "symptoms", "treatment"],
+          "priority": 85
+        },
+        "fitness": {
+          "name": "Fitness",
+          "keywords": ["fitness", "exercise", "workout", "gym"],
+          "priority": 75
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "created": "2025-01-01", 
+    "description": "Default categories for TabSorter AI extension",
+    "totalCategories": 15,
+    "colors": ["blue", "purple", "green", "orange", "red", "pink", "grey", "cyan", "yellow", "teal", "indigo"],
+    "priorityLevels": {
+      "critical": 90-100,
+      "high": 70-89, 
+      "medium": 50-69,
+      "low": 30-49,
+      "minimal": 10-29
+    }
+  }
+}

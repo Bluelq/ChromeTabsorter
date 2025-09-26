@@ -3,107 +3,208 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Tab Sorter</title>
+  <title>TabSorter AI</title>
   <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="../styles/common.css">
 </head>
 <body>
   <div class="popup-container">
     <!-- Header -->
-    <header class="header">
-      <h1 class="title">
-        <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <rect x="3" y="3" width="7" height="7"></rect>
-          <rect x="14" y="3" width="7" height="7"></rect>
-          <rect x="14" y="14" width="7" height="7"></rect>
-          <rect x="3" y="14" width="7" height="7"></rect>
-        </svg>
-        AI Tab Sorter
-      </h1>
-      <button id="settingsBtn" class="settings-btn" title="Settings">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <circle cx="12" cy="12" r="3"></circle>
-          <path d="M12 1v6m0 6v6m9-9h-6m-6 0H3"></path>
-        </svg>
-      </button>
+    <header class="popup-header">
+      <div class="header-content">
+        <img src="../icons/icon-48.png" alt="TabSorter AI" class="logo">
+        <h1>TabSorter AI</h1>
+        <button id="settingsBtn" class="icon-btn" title="Settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 1v6m0 6v6m4.22-13.22l4.24 4.24M1.54 6.54l4.24 4.24M21 12h-6m-6 0H3m13.22 4.22l4.24 4.24M6.54 17.46l4.24 4.24"/>
+          </svg>
+        </button>
+      </div>
     </header>
-    
-    <!-- Stats Section -->
-    <section class="stats">
-      <div class="stat-item">
-        <span class="stat-label">Open Tabs</span>
-        <span id="tabCount" class="stat-value">-</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Windows</span>
-        <span id="windowCount" class="stat-value">-</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Last Sort</span>
-        <span id="lastSort" class="stat-value">Never</span>
-      </div>
-    </section>
-    
-    <!-- Main Actions -->
-    <section class="actions">
-      <button id="sortAllBtn" class="action-btn primary">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline>
-          <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
-        </svg>
-        Sort All Tabs
-      </button>
-      
-      <button id="sortWindowBtn" class="action-btn secondary">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-          <line x1="9" y1="9" x2="15" y2="9"></line>
-          <line x1="9" y1="15" x2="15" y2="15"></line>
-        </svg>
-        Sort Current Window
-      </button>
-    </section>
-    
-    <!-- Status Section -->
-    <section id="statusSection" class="status-section hidden">
-      <div class="status-message">
-        <div class="spinner"></div>
-        <span id="statusText">Processing tabs...</span>
-      </div>
-      <div class="progress-bar">
-        <div id="progressFill" class="progress-fill"></div>
-      </div>
-    </section>
-    
-    <!-- Sort Mode Toggle -->
-    <section class="mode-toggle">
-      <label class="toggle-label">Sort Mode:</label>
-      <div class="toggle-group">
-        <input type="radio" id="groupMode" name="sortMode" value="groups" checked>
-        <label for="groupMode" class="toggle-option">Groups</label>
-        <input type="radio" id="windowMode" name="sortMode" value="windows">
-        <label for="windowMode" class="toggle-option">Windows</label>
-      </div>
-    </section>
-    
-    <!-- Results Section -->
-    <section id="resultsSection" class="results-section hidden">
-      <h3 class="results-title">Sort Complete!</h3>
-      <div id="resultsList" class="results-list"></div>
-    </section>
-    
+
+    <!-- Main Content -->
+    <main class="popup-main">
+      <!-- Search Bar -->
+      <section class="search-section">
+        <div class="search-container">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input type="text" id="searchInput" class="search-input" placeholder="Search tabs by keyword...">
+          <button id="clearSearchBtn" class="clear-search-btn" style="display: none;">×</button>
+        </div>
+        <div id="searchResults" class="search-results" style="display: none;"></div>
+      </section>
+
+      <!-- Tab Selection Mode -->
+      <section class="selection-mode-section" style="display: none;">
+        <div class="selection-header">
+          <span class="selection-count">0 tabs selected</span>
+          <div class="selection-actions">
+            <button id="selectAllBtn" class="text-btn">Select All</button>
+            <button id="deselectAllBtn" class="text-btn">Clear</button>
+            <button id="cancelSelectionBtn" class="text-btn danger">Cancel</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Statistics Section -->
+      <section id="stats" class="stats-section">
+        <div class="stat-grid">
+          <div class="stat-item">
+            <span class="stat-value">0</span>
+            <span class="stat-label">Total Tabs</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">0</span>
+            <span class="stat-label">Groups Found</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">0%</span>
+            <span class="stat-label">Avg Confidence</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">0</span>
+            <span class="stat-label">Duplicates</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Actions -->
+      <section class="quick-actions">
+        <button id="sortBtn" class="primary-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18M7 12h10M11 18h2"/>
+          </svg>
+          <span id="sortBtnText">Sort All Tabs</span>
+        </button>
+        <button id="selectTabsBtn" class="secondary-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 11 12 14 22 4"/>
+            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+          </svg>
+          Select Tabs
+        </button>
+        <button id="previewBtn" class="secondary-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          Preview
+        </button>
+      </section>
+
+      <!-- Advanced Options -->
+      <section class="advanced-section">
+        <details class="advanced-details">
+          <summary class="advanced-summary">
+            <span>Advanced Options</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </summary>
+          <div class="advanced-content">
+            <!-- Auto-Group Toggle -->
+            <div class="toggle-item">
+              <div>
+                <label for="autoGroupToggle">Auto-Group</label>
+                <div class="toggle-description">Automatically group tabs on browser start</div>
+              </div>
+              <input type="checkbox" id="autoGroupToggle" class="toggle-switch">
+            </div>
+            
+            <!-- Smart Mode Toggle -->
+            <div class="toggle-item">
+              <div>
+                <label for="smartModeToggle">Smart Mode</label>
+                <div class="toggle-description">Use AI for intelligent categorization</div>
+              </div>
+              <input type="checkbox" id="smartModeToggle" class="toggle-switch" checked>
+            </div>
+            
+            <!-- Partial Grouping Toggle -->
+            <div class="toggle-item">
+              <div>
+                <label for="partialGroupingToggle">Partial Grouping</label>
+                <div class="toggle-description">Only group high-confidence matches (80%+)</div>
+              </div>
+              <input type="checkbox" id="partialGroupingToggle" class="toggle-switch">
+            </div>
+            
+            <!-- Preserve Pinned Toggle -->
+            <div class="toggle-item">
+              <div>
+                <label for="preservePinnedToggle">Preserve Pinned</label>
+                <div class="toggle-description">Don't move pinned tabs</div>
+              </div>
+              <input type="checkbox" id="preservePinnedToggle" class="toggle-switch" checked>
+            </div>
+            
+            <!-- AI Analysis Depth -->
+            <div class="toggle-item">
+              <div>
+                <label for="analysisDepth">AI Analysis Depth</label>
+                <div class="toggle-description">Control AI analysis thoroughness</div>
+              </div>
+              <select id="analysisDepth" class="form-select">
+                <option value="quick">Quick (URL only)</option>
+                <option value="standard" selected>Standard (URL + Title)</option>
+                <option value="deep">Deep (Enhanced)</option>
+              </select>
+            </div>
+            
+            <!-- Export Options -->
+            <div class="action-buttons">
+              <button id="exportBookmarksBtn" class="text-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+                </svg>
+                Save as Bookmarks
+              </button>
+              <button id="exportSessionBtn" class="text-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+                Export Session
+              </button>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- Results Section -->
+      <section id="results" class="results-section">
+        <!-- Tab Selection List (shown in selection mode) -->
+        <div id="tabSelectionList" class="tab-selection-list" style="display: none;">
+          <!-- Tabs will be listed here with checkboxes -->
+        </div>
+        
+        <!-- Groups view (default) -->
+        <div id="groupsContainer" class="groups-scroll-container">
+          <!-- Groups will be dynamically inserted here -->
+        </div>
+      </section>
+    </main>
+
     <!-- Footer -->
-    <footer class="footer">
-      <div class="shortcuts">
-        <span class="shortcut-hint">
-          <kbd>Ctrl+Shift+S</kbd> to quick sort
-        </span>
-      </div>
-      <div class="stats-mini">
-        <span id="totalSorts" class="stat-mini">0 total sorts</span>
+    <footer class="popup-footer">
+      <div class="footer-links">
+        <a href="#" id="helpLink">Help</a>
+        <span class="separator">•</span>
+        <a href="#" id="feedbackLink">Feedback</a>
+        <span class="separator">•</span>
+        <span class="version">v1.1.0</span>
       </div>
     </footer>
   </div>
-  
-  <script type="module" src="popup.js"></script>
+
+  <!-- Preview Modal Container -->
+  <div id="previewModalContainer"></div>
+
+  <!-- Scripts -->
+  <script src="popup.js"></script>
 </body>
 </html>

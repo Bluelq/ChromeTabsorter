@@ -101,8 +101,17 @@ class RealAIProcessor {
         const error = details.error || new Error('Unknown error');
         const envelope = this.createErrorEnvelope(stage, error, details.resource);
 
-        // Best-effort messaging (no await, no error handling)
-        window.Messaging?.send('ai:error', envelope);
+        // Send error message directly via chrome.runtime
+        if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+            chrome.runtime.sendMessage({
+                type: 'ai:error',
+                ...envelope
+            }, (response) => {
+                if (chrome.runtime.lastError) {
+                    console.log('ai:error message not received:', chrome.runtime.lastError);
+                }
+            });
+        }
     }
 
     // State transition with detailed logging and milestone validation
@@ -175,11 +184,19 @@ class RealAIProcessor {
 
     // Broadcast current state to listeners
     broadcastStateChange() {
-        // Best-effort messaging (no await, no error handling)
-        window.Messaging?.send('ai:status', {
-            state: this.currentState,
-            details: this.stateDetails
-        });
+        // Send status update directly via chrome.runtime
+        if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+            chrome.runtime.sendMessage({
+                type: 'ai:status', 
+                state: this.currentState,
+                details: this.stateDetails
+            }, (response) => {
+                // Ignore lastError for broadcast messages
+                if (chrome.runtime.lastError) {
+                    // This is expected if no listeners are registered
+                }
+            });
+        }
     }
 
     // Robust initialization with state machine
@@ -891,123 +908,149 @@ RealAIProcessor.prototype.runSelfTest = async function() {
     let initCompleted = false;
 
     // Set up message handler for the unified processor instance
-    messageHandler = async (message, sender, sendResponse) => {
+    messageHandler = (message, sender, sendResponse) => {
         console.log('Real AI Offscreen received message:', message.type);
 
-        switch (message.type) {
-            case 'INIT_AI':
-                try {
-                    await processor.initialize();
-                    sendResponse({ success: true, state: processor.currentState });
-                } catch (error) {
-                    sendResponse({ success: false, error: error.message, state: processor ? processor.currentState : 'UNKNOWN' });
-                }
-                break;
-
-            case 'ai:status':
-                sendResponse({
-                    state: processor.currentState,
-                    details: processor.stateDetails,
-                    ready: processor.currentState === processor.states.READY
-                });
-                break;
-
-            case 'ai:selftest':
-                try {
-                    const testResult = await processor.runSelfTest();
-                    sendResponse({
-                        success: testResult.passed,
-                        details: testResult,
-                        state: processor.currentState
-                    });
-                } catch (error) {
-                    sendResponse({
-                        success: false,
-                        error: error.message,
-                        state: processor.currentState
-                    });
-                }
-                break;
-
-            case 'ai:embed':
-                if (processor.currentState !== processor.states.READY || !processor.modelReady) {
-                    sendResponse({
-                        type: 'ai:not-ready',
-                        state: processor.currentState,
-                        reason: 'AI model not fully initialized',
-                        modelReady: processor.modelReady
-                    });
-                    break;
-                }
-
-                try {
-                    const embedding = await processor.generateEmbedding(message.text);
-                    sendResponse({
-                        success: true,
-                        embedding: embedding,
-                        text: message.text
-                    });
-                } catch (error) {
-                    sendResponse({
-                        success: false,
-                        error: error.message,
-                        text: message.text
-                    });
-                }
-                break;
-
-            case 'PROCESS_TABS':
-                try {
-                    if (processor.currentState !== processor.states.READY || !processor.modelReady) {
-                        throw new Error(`AI not ready. State: ${processor.currentState}, Model Ready: ${processor.modelReady}`);
-                    }
-
-                    const { groups, ungrouped } = await processor.groupTabsBySimilarity(
-                        message.tabs,
-                        message.threshold || 0.5
-                    );
-                    const labeledGroups = await processor.generateGroupLabels(groups);
-
-                    sendResponse({
-                        success: true,
-                        groups: labeledGroups,
-                        ungrouped
-                    });
-                } catch (error) {
-                    console.error('Catastrophic error in PROCESS_TABS:', error);
-                    // Send a structured error response instead of crashing the port
-                    sendResponse({
-                        success: false,
-                        error: 'A critical error occurred during tab processing.',
-                        details: {
-                            message: error.message,
-                            stack: error.stack,
-                            name: error.name
+        // Handle async operations properly
+        (async () => {
+            try {
+                switch (message.type) {
+                    case 'INIT_AI':
+                        try {
+                            console.log('[AI LIFECYCLE] Received INIT_AI message, starting initialization...');
+                            if (!initStarted) {
+                                await startInitialization();
+                            } else if (initCompleted) {
+                                console.log('[AI LIFECYCLE] Already initialized');
+                            } else {
+                                console.log('[AI LIFECYCLE] Initialization already in progress');
+                                // Wait for existing initialization to complete
+                                await processor.initPromise;
+                            }
+                            sendResponse({ 
+                                success: processor.currentState === processor.states.READY,
+                                state: processor.currentState,
+                                details: processor.stateDetails
+                            });
+                        } catch (error) {
+                            sendResponse({ 
+                                success: false, 
+                                error: error.message, 
+                                state: processor ? processor.currentState : 'UNKNOWN' 
+                            });
                         }
-                    });
-                }
-                break;
+                        break;
 
-            case 'GENERATE_EMBEDDING':
-                if (processor.currentState !== processor.states.READY || !processor.modelReady) {
-                    sendResponse({
-                        success: false,
-                        error: 'AI model not ready',
-                        state: processor.currentState,
-                        modelReady: processor.modelReady
-                    });
-                    break;
-                }
+                    case 'ai:status':
+                        sendResponse({
+                            state: processor.currentState,
+                            details: processor.stateDetails,
+                            ready: processor.currentState === processor.states.READY
+                        });
+                        break;
 
-                try {
-                    const embedding = await processor.generateEmbedding(message.text);
-                    sendResponse({ success: true, embedding });
-                } catch (error) {
-                    sendResponse({ success: false, error: error.message });
-                }
-                break;
-        }
+                    case 'ai:selftest':
+                        try {
+                            const testResult = await processor.runSelfTest();
+                            sendResponse({
+                                success: testResult.passed,
+                                details: testResult,
+                                state: processor.currentState
+                            });
+                        } catch (error) {
+                            sendResponse({
+                                success: false,
+                                error: error.message,
+                                state: processor.currentState
+                            });
+                        }
+                        break;
 
+                    case 'ai:embed':
+                        if (processor.currentState !== processor.states.READY || !processor.modelReady) {
+                            sendResponse({
+                                type: 'ai:not-ready',
+                                state: processor.currentState,
+                                reason: 'AI model not fully initialized',
+                                modelReady: processor.modelReady
+                            });
+                            break;
+                        }
+
+                        try {
+                            const embedding = await processor.generateEmbedding(message.text);
+                            sendResponse({
+                                success: true,
+                                embedding: embedding,
+                                text: message.text
+                            });
+                        } catch (error) {
+                            sendResponse({
+                                success: false,
+                                error: error.message,
+                                text: message.text
+                            });
+                        }
+                        break;
+
+                    case 'PROCESS_TABS':
+                        try {
+                            if (processor.currentState !== processor.states.READY || !processor.modelReady) {
+                                throw new Error(`AI not ready. State: ${processor.currentState}, Model Ready: ${processor.modelReady}`);
+                            }
+
+                            const { groups, ungrouped } = await processor.groupTabsBySimilarity(
+                                message.tabs,
+                                message.threshold || 0.5
+                            );
+                            const labeledGroups = await processor.generateGroupLabels(groups);
+
+                            sendResponse({
+                                success: true,
+                                groups: labeledGroups,
+                                ungrouped
+                            });
+                        } catch (error) {
+                            console.error('Catastrophic error in PROCESS_TABS:', error);
+                            // Send a structured error response instead of crashing the port
+                            sendResponse({
+                                success: false,
+                                error: 'A critical error occurred during tab processing.',
+                                details: {
+                                    message: error.message,
+                                    stack: error.stack,
+                                    name: error.name
+                                }
+                            });
+                        }
+                        break;
+
+                    case 'GENERATE_EMBEDDING':
+                        if (processor.currentState !== processor.states.READY || !processor.modelReady) {
+                            sendResponse({
+                                success: false,
+                                error: 'AI model not ready',
+                                state: processor.currentState,
+                                modelReady: processor.modelReady
+                            });
+                            break;
+                        }
+
+                        try {
+                            const embedding = await processor.generateEmbedding(message.text);
+                            sendResponse({ success: true, embedding });
+                        } catch (error) {
+                            sendResponse({ success: false, error: error.message });
+                        }
+                        break;
+                }
+            } catch (error) {
+                console.error('Message handler error:', error);
+                sendResponse({ success: false, error: error.message });
+            }
+        })();
+
+        // IMPORTANT: Return true to indicate we'll respond asynchronously
         return true;
     };
 
@@ -1016,9 +1059,9 @@ RealAIProcessor.prototype.runSelfTest = async function() {
         chrome.runtime.onMessage.addListener(messageHandler);
     }
 
-    // Wait for DOM to be fully loaded before initializing
+    // Wait for DOM to be fully loaded before setting up
     function onDocumentReady() {
-        console.log('[AI LIFECYCLE] DOM ready, initializing AI processor...');
+        console.log('[AI LIFECYCLE] DOM ready, waiting for INIT_AI message...');
 
         // Add status helper
         window.AI_STATUS = () => ({
@@ -1027,8 +1070,8 @@ RealAIProcessor.prototype.runSelfTest = async function() {
             ready: processor.currentState === processor.states.READY
         });
 
-        // Start initialization (only once per document lifetime)
-        startInitialization();
+        // Don't auto-initialize, wait for INIT_AI message
+        // startInitialization();
     }
 
     async function startInitialization() {
@@ -1048,23 +1091,40 @@ RealAIProcessor.prototype.runSelfTest = async function() {
             // Emit final READY signal with complete details (only once per load)
             if (!processor.readyEmitted) {
                 processor.readyEmitted = true;
-                // Best-effort messaging (no await, no error handling)
-                window.Messaging?.send('ai:ready', {
-                    details: processor.stateDetails,
-                    timestamp: Date.now()
-                });
+                // Send ai:ready message to background script
+                if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+                    chrome.runtime.sendMessage({
+                        type: 'ai:ready',
+                        details: processor.stateDetails,
+                        timestamp: Date.now()
+                    }, (response) => {
+                        if (chrome.runtime.lastError) {
+                            console.log('ai:ready message not received:', chrome.runtime.lastError);
+                        }
+                    });
+                    console.log('[AI LIFECYCLE] Sent ai:ready message to background script');
+                }
             }
 
         } catch (error) {
             initCompleted = false;
+            initStarted = false;  // Reset so it can be retried
             console.error('[AI LIFECYCLE] AI initialization failed:', error);
 
-            // Best-effort error messaging
-            window.Messaging?.send('ai:error', {
-                error: error.message,
-                stage: processor ? processor.currentState : 'UNKNOWN',
-                timestamp: Date.now()
-            });
+            // Send ai:error message to background script
+            if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+                chrome.runtime.sendMessage({
+                    type: 'ai:error',
+                    error: error.message,
+                    stage: processor ? processor.currentState : 'UNKNOWN',
+                    timestamp: Date.now()
+                }, (response) => {
+                    if (chrome.runtime.lastError) {
+                        console.log('ai:error message not received:', chrome.runtime.lastError);
+                    }
+                });
+                console.log('[AI LIFECYCLE] Sent ai:error message to background script');
+            }
         }
     }
 
@@ -1077,8 +1137,9 @@ RealAIProcessor.prototype.runSelfTest = async function() {
             if (processor && !initCompleted &&
                 (processor.currentState === processor.states.ERROR ||
                  processor.currentState === processor.states.BOOT)) {
-                console.log('[AI LIFECYCLE] Restarting failed initialization...');
-                startInitialization();
+                console.log('[AI LIFECYCLE] Document visible but initialization failed/not started');
+                // Don't auto-restart, wait for INIT_AI message
+                // startInitialization();
             }
         }
     });

@@ -3,59 +3,146 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Tab Sorter - Settings</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 20px;
-      background: #f6f7f9;
-    }
-    
-    h1 {
-      color: #2e3338;
-      margin-bottom: 30px;
-    }
-    
-    .placeholder {
-      background: white;
-      padding: 40px;
-      border-radius: 8px;
-      text-align: center;
-      color: #72767d;
-    }
-    
-    .placeholder h2 {
-      color: #5865f2;
-      margin-bottom: 16px;
-    }
-    
-    .placeholder p {
-      line-height: 1.6;
-    }
-  </style>
+  <title>TabSorter AI - Settings</title>
+  <link rel="stylesheet" href="../styles/common.css">
+  <link rel="stylesheet" href="options.css">
 </head>
 <body>
-  <h1>AI Tab Sorter Settings</h1>
-  
-  <div class="placeholder">
-    <h2>Settings Coming in Part 4</h2>
-    <p>This page will include:</p>
-    <ul style="text-align: left; max-width: 400px; margin: 20px auto;">
-      <li>Category management and customization</li>
-      <li>Custom rule creation</li>
-      <li>Auto-sort scheduling</li>
-      <li>AI model selection</li>
-      <li>Import/Export settings</li>
-      <li>Advanced sorting preferences</li>
-    </ul>
-    <p>For now, you can use the popup to switch between Groups and Windows mode.</p>
+  <div class="options-container">
+    <!-- Header -->
+    <header class="options-header">
+      <h1 class="options-title">
+        <svg class="icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        TabSorter AI Settings
+      </h1>
+      <div class="options-actions">
+        <button id="resetSettings" class="btn btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          Reset to Defaults
+        </button>
+        <button id="exportSettings" class="btn btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Export
+        </button>
+        <button id="importSettings" class="btn btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          Import
+        </button>
+        <button id="saveSettings" class="btn btn-primary">Save Changes</button>
+      </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="options-nav">
+      <a href="#general" class="nav-tab active" data-tab="general">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M12 1v6m0 6v6m9-9h-6m-6 0H3"></path>
+        </svg>
+        General
+      </a>
+      <a href="#categories" class="nav-tab" data-tab="categories">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        Categories
+      </a>
+      <a href="#rules" class="nav-tab" data-tab="rules">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 11 12 14 22 4"></polyline>
+          <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c1.27 0 2.47.26 3.57.74"></path>
+        </svg>
+        Custom Rules
+      </a>
+      <a href="#advanced" class="nav-tab" data-tab="advanced">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+        Advanced
+      </a>
+    </nav>
+
+    <!-- Tab Contents -->
+    
+    <!-- General Settings Tab -->
+    <div id="generalTab" class="tab-content active">
+      <div id="generalSettings">
+        <!-- Content will be populated by JavaScript -->
+      </div>
+    </div>
+
+    <!-- Categories Tab -->
+    <div id="categoriesTab" class="tab-content">
+      <div class="settings-section">
+        <h3>Category Management</h3>
+        <p class="setting-description">
+          Configure and customize categories used for intelligent tab sorting. 
+          Categories help the AI understand different types of content and group tabs accordingly.
+        </p>
+        
+        <div id="categoriesSettings">
+          <!-- Categories will be populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Rules Tab -->
+    <div id="rulesTab" class="tab-content">
+      <div class="settings-section">
+        <h3>Custom Rules Engine</h3>
+        <p class="setting-description">
+          Create custom rules to override automatic categorization for specific websites or content types.
+          Rules are processed in priority order and can be based on domains, URL patterns, or title keywords.
+        </p>
+        
+        <div id="customRulesSettings">
+          <!-- Custom rules will be populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Advanced Settings Tab -->
+    <div id="advancedTab" class="tab-content">
+      <div id="advancedSettings">
+        <!-- Advanced settings will be populated by JavaScript -->
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer style="margin-top: 48px; text-align: center; color: var(--text-secondary); font-size: var(--font-size-sm);">
+      <p>TabSorter AI v2.0.0 - Advanced tab management with AI-powered semantic grouping</p>
+      <p>
+        <a href="https://github.com/yourusername/tab-sorter-extension" class="link" target="_blank">GitHub</a> |
+        <a href="https://github.com/yourusername/tab-sorter-extension/issues" class="link" target="_blank">Report Issue</a> |
+        <a href="https://github.com/yourusername/tab-sorter-extension/blob/main/PRIVACY.md" class="link" target="_blank">Privacy Policy</a>
+      </p>
+    </footer>
   </div>
-  
-  <script>
-    // Placeholder script - will be implemented in Part 4
-    console.log('Options page loaded - Full implementation coming in Part 4');
-  </script>
+
+  <!-- Hidden file input for import -->
+  <input type="file" id="importFileInput" accept=".json" style="display: none;">
+
+  <script src="options.js"></script>
 </body>
 </html>
